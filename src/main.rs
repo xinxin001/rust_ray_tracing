@@ -1,6 +1,6 @@
 mod color;
+mod ray;
 mod vec3;
-
 use crate::{color::write_color, vec3::Color};
 fn main() {
     let image_width = 256;
