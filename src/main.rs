@@ -10,14 +10,14 @@ use crate::{
 
 fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     let oc = r.origin() - *center;
-    let a = dot(r.direction(), r.direction());
-    let b = 2.0 * dot(oc, r.direction());
-    let c = dot(oc, oc) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
+    let a = r.direction().length_squared();
+    let half_b = dot(oc, r.direction());
+    let c = oc.length_squared() - radius * radius;
+    let discriminant = half_b * half_b - a * c;
     if discriminant < 0.0 {
         return -1.0;
     }
-    return (-b - discriminant.sqrt()) / (2.0 * a);
+    return (-half_b - discriminant.sqrt()) / a;
 }
 
 fn ray_color(r: &Ray) -> Color {
