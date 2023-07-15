@@ -4,7 +4,7 @@ use crate::{
     vec3::{Point3, Vec3},
 };
 
-struct HittableList {
+pub struct HittableList {
     pub objects: Vec<Box<dyn Hittable>>,
 }
 

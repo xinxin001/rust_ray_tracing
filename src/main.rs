@@ -2,12 +2,18 @@ mod color;
 mod hittable;
 mod hittable_list;
 mod ray;
+mod rtweekend;
 mod sphere;
 mod vec3;
 
+use hittable::{HitRecord, Hittable};
+use rtweekend::INFINITY;
+
 use crate::{
     color::write_color,
+    hittable_list::HittableList,
     ray::Ray,
+    sphere::Sphere,
     vec3::{dot, unit_vector, Color, Point3, Vec3},
 };
 
@@ -23,11 +29,10 @@ fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     return (-half_b - discriminant.sqrt()) / a;
 }
 
-fn ray_color(r: &Ray) -> Color {
-    let t = hit_sphere(&Point3::new(0.0, 0.0, -1.0), 0.5, r);
-    if t > 0.0 {
-        let n = unit_vector(r.at(t) - Vec3::new(0.0, 0.0, -1.0));
-        return Color::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0) * 0.5;
+fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
+    let mut rec = HitRecord::default();
+    if world.hit(r, 0.0, INFINITY, &mut rec) {
+        return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5;
     }
     let unit_direction: Vec3 = unit_vector(r.direction());
     let t = 0.5 * (unit_direction.y() + 1.0);
@@ -35,10 +40,23 @@ fn ray_color(r: &Ray) -> Color {
 }
 
 fn main() -> std::io::Result<()> {
+    // Image
     let aspect_ratio = 16.0 / 9.0;
     let image_width: usize = 400;
     let image_height: usize = (image_width as f64 / aspect_ratio) as usize;
 
+    // World
+    let mut world = HittableList::new();
+    world.add(Box::new(Sphere::with_values(
+        Point3::new(0.0, 0.0, -1.0),
+        0.5,
+    )));
+    world.add(Box::new(Sphere::with_values(
+        Point3::new(0.0, -100.5, -1.0),
+        100.0,
+    )));
+
+    // Camera
     let viewport_height = 2.0;
     let viewport_width = aspect_ratio * viewport_height;
     let focal_length = 1.0;
@@ -59,7 +77,7 @@ fn main() -> std::io::Result<()> {
                 origin,
                 lower_left_corner + horizontal * u + vertical * v - origin,
             );
-            let pixel_color = ray_color(&r);
+            let pixel_color = ray_color(&r, &world);
             write_color(&mut std::io::stdout(), pixel_color)?;
         }
     }
