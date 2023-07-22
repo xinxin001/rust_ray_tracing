@@ -37,7 +37,7 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
     if depth <= 0 {
         return Color::new(0.0, 0.0, 0.0);
     }
-    if world.hit(r, 0.0, INFINITY, &mut rec) {
+    if world.hit(r, 0.001, INFINITY, &mut rec) {
         let target: Point3 = rec.p + rec.normal + Vec3::random_in_unit_sphere();
         return ray_color(&Ray::new(rec.p, target - rec.p), world, depth - 1) * 0.5;
     }
