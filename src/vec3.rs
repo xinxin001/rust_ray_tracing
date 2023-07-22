@@ -55,16 +55,6 @@ impl Vec3 {
             random_double_range(min, max),
         );
     }
-
-    pub fn random_in_unit_sphere() -> Self {
-        loop {
-            let p = Self::random_range(-1.0, 1.0);
-            if p.length_squared() >= 1.0 {
-                continue;
-            }
-            return p;
-        }
-    }
 }
 
 pub fn dot(u: Vec3, v: Vec3) -> f64 {
@@ -83,6 +73,20 @@ pub fn cross(u: Vec3, v: Vec3) -> Vec3 {
 
 pub fn unit_vector(v: Vec3) -> Vec3 {
     return v / v.length();
+}
+
+pub fn random_in_unit_sphere() -> Vec3 {
+    loop {
+        let p = Vec3::random_range(-1.0, 1.0);
+        if p.length_squared() >= 1.0 {
+            continue;
+        }
+        return p;
+    }
+}
+
+pub fn random_unit_vector() -> Vec3 {
+    unit_vector(random_in_unit_sphere())
 }
 
 impl Neg for Vec3 {

@@ -9,6 +9,7 @@ mod vec3;
 
 use hittable::{HitRecord, Hittable};
 use rtweekend::INFINITY;
+use vec3::{random_in_unit_sphere, random_unit_vector};
 
 use crate::{
     camera::Camera,
@@ -38,7 +39,7 @@ fn ray_color(r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
         return Color::new(0.0, 0.0, 0.0);
     }
     if world.hit(r, 0.001, INFINITY, &mut rec) {
-        let target: Point3 = rec.p + rec.normal + Vec3::random_in_unit_sphere();
+        let target: Point3 = rec.p + rec.normal + random_unit_vector();
         return ray_color(&Ray::new(rec.p, target - rec.p), world, depth - 1) * 0.5;
     }
     let unit_direction: Vec3 = unit_vector(r.direction());
@@ -78,7 +79,7 @@ fn main() -> std::io::Result<()> {
                 let u = (i as f64 + random_double()) / (image_width - 1) as f64;
                 let v = (j as f64 + random_double()) / (image_height - 1) as f64;
                 let r = camera.get_ray(u, v);
-                pixel_color += ray_color(&r, &world, 50);
+                pixel_color += ray_color(&r, &world, max_depth);
             }
             write_color(&mut std::io::stdout(), pixel_color, samples_per_pixel)?;
         }
