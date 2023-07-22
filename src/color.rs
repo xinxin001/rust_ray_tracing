@@ -1,12 +1,14 @@
-use crate::vec3::Color;
+use crate::{rtweekend::clamp, vec3::Color};
 use std::io::Write;
 
-pub fn write_color(out: &mut dyn Write, pixel_color: Color) -> std::io::Result<()> {
-    writeln!(
-        out,
-        "{} {} {}",
-        (255.999 * pixel_color.x()) as u8,
-        (255.999 * pixel_color.y()) as u8,
-        (255.999 * pixel_color.z()) as u8
-    )
+pub fn write_color(
+    out: &mut dyn Write,
+    pixel_color: Color,
+    samples_per_pixel: u32,
+) -> std::io::Result<()> {
+    let scale = 1.0 / samples_per_pixel as f64;
+    let r = (256.0 * clamp(pixel_color[0] * scale, 0.0, 0.999)) as i32;
+    let g = (256.0 * clamp(pixel_color[1] * scale, 0.0, 0.999)) as i32;
+    let b = (256.0 * clamp(pixel_color[2] * scale, 0.0, 0.999)) as i32;
+    writeln!(out, "{} {} {}", r, g, b)
 }

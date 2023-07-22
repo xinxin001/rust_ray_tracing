@@ -16,3 +16,7 @@ pub fn random_double() -> f64 {
 pub fn random_double_range(min: f64, max: f64) -> f64 {
     rand::thread_rng().gen_range(min..max)
 }
+
+pub fn clamp(x: f64, min: f64, max: f64) -> f64 {
+    x.clamp(min, max)
+}
