@@ -1,5 +1,7 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub};
 
+use crate::rtweekend::{random_double, random_double_range};
+
 pub type Point3 = Vec3; // 3D point
 pub type Color = Vec3; // RGB color
 
@@ -40,6 +42,28 @@ impl Vec3 {
     }
     pub fn length_squared(&self) -> f64 {
         self.e.iter().map(|e| e * e).sum()
+    }
+
+    pub fn random() -> Self {
+        return Vec3::new(random_double(), random_double(), random_double());
+    }
+
+    pub fn random_range(min: f64, max: f64) -> Self {
+        return Vec3::new(
+            random_double_range(min, max),
+            random_double_range(min, max),
+            random_double_range(min, max),
+        );
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let p = Self::random_range(-1.0, 1.0);
+            if p.length_squared() >= 1.0 {
+                continue;
+            }
+            return p;
+        }
     }
 }
 

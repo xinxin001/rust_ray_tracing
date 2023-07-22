@@ -32,10 +32,14 @@ fn hit_sphere(center: &Point3, radius: f64, r: &Ray) -> f64 {
     return (-half_b - discriminant.sqrt()) / a;
 }
 
-fn ray_color(r: &Ray, world: &dyn Hittable) -> Color {
+fn ray_color(r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
     let mut rec = HitRecord::default();
+    if depth <= 0 {
+        return Color::new(0.0, 0.0, 0.0);
+    }
     if world.hit(r, 0.0, INFINITY, &mut rec) {
-        return (rec.normal + Color::new(1.0, 1.0, 1.0)) * 0.5;
+        let target: Point3 = rec.p + rec.normal + Vec3::random_in_unit_sphere();
+        return ray_color(&Ray::new(rec.p, target - rec.p), world, depth - 1) * 0.5;
     }
     let unit_direction: Vec3 = unit_vector(r.direction());
     let t = 0.5 * (unit_direction.y() + 1.0);
@@ -48,6 +52,7 @@ fn main() -> std::io::Result<()> {
     let image_width: usize = 400;
     let image_height: usize = (image_width as f64 / aspect_ratio) as usize;
     let samples_per_pixel = 100;
+    let max_depth = 50;
 
     // World
     let mut world = HittableList::new();
@@ -73,7 +78,7 @@ fn main() -> std::io::Result<()> {
                 let u = (i as f64 + random_double()) / (image_width - 1) as f64;
                 let v = (j as f64 + random_double()) / (image_height - 1) as f64;
                 let r = camera.get_ray(u, v);
-                pixel_color += ray_color(&r, &world);
+                pixel_color += ray_color(&r, &world, 50);
             }
             write_color(&mut std::io::stdout(), pixel_color, samples_per_pixel)?;
         }

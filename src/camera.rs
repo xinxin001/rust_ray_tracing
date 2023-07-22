@@ -11,7 +11,7 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new() -> Camera {
+    pub fn new() -> Self {
         let aspect_ratio = 16.0 / 9.0;
         let viewport_height = 2.0;
         let viewport_width = aspect_ratio * viewport_height;
@@ -23,7 +23,7 @@ impl Camera {
         let lower_left_corner =
             origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
 
-        Camera {
+        Self {
             origin,
             lower_left_corner,
             horizontal,
