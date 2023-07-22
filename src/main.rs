@@ -71,7 +71,7 @@ fn main() -> std::io::Result<()> {
             let mut pixel_color = Color::new(0.0, 0.0, 0.0);
             for _ in 0..samples_per_pixel {
                 let u = (i as f64 + random_double()) / (image_width - 1) as f64;
-                let v = (j as f64 + random_double()) / (image_width - 1) as f64;
+                let v = (j as f64 + random_double()) / (image_height - 1) as f64;
                 let r = camera.get_ray(u, v);
                 pixel_color += ray_color(&r, &world);
             }
