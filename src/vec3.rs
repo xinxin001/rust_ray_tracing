@@ -43,6 +43,10 @@ impl Vec3 {
     pub fn length_squared(&self) -> f64 {
         self.e.iter().map(|e| e * e).sum()
     }
+    pub fn near_zero(&self) -> bool {
+        let s = 1e-8;
+        self.e.iter().all(|&val| val.abs() < s)
+    }
 
     pub fn random() -> Self {
         return Vec3::new(random_double(), random_double(), random_double());
@@ -95,6 +99,10 @@ pub fn random_in_hemisphere(normal: Vec3) -> Vec3 {
         return in_unit_sphere;
     }
     -in_unit_sphere
+}
+
+pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+    *v - *n * 2.0 * dot(*v, *n)
 }
 
 impl Neg for Vec3 {

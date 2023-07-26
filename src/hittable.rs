@@ -1,6 +1,7 @@
 use std::rc::Rc;
 
 use crate::{
+    material::Material,
     ray::Ray,
     vec3::{dot, Color, Point3, Vec3},
 };
@@ -27,8 +28,4 @@ impl HitRecord {
 
 pub trait Hittable {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64, rec: &mut HitRecord) -> bool;
-}
-
-pub trait Material {
-    fn scatter(&self, r_in: &Ray, rec: &HitRecord, attenuation: &Color, scattered: &Ray) -> bool;
 }

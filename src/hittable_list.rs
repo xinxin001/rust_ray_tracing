@@ -37,6 +37,7 @@ impl Hittable for HittableList {
             normal: Vec3::new(0.0, 0.0, 0.0),
             t: 0.0,
             front_face: false,
+            mat_ptr: None,
         };
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
