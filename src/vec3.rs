@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub};
 
-use crate::rtweekend::{random_double, random_double_range};
+use crate::rtweekend::random_double_range;
 
 pub type Point3 = Vec3; // 3D point
 pub type Color = Vec3; // RGB color
@@ -28,15 +28,15 @@ impl Vec3 {
     pub fn new(e0: f64, e1: f64, e2: f64) -> Self {
         Self { e: [e0, e1, e2] }
     }
-    pub fn x(&self) -> f64 {
-        self[0]
-    }
+    // pub fn x(&self) -> f64 {
+    //     self[0]
+    // }
     pub fn y(&self) -> f64 {
         self[1]
     }
-    pub fn z(&self) -> f64 {
-        self[2]
-    }
+    // pub fn z(&self) -> f64 {
+    //     self[2]
+    // }
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }
@@ -48,9 +48,9 @@ impl Vec3 {
         self.e.iter().all(|&val| val.abs() < s)
     }
 
-    pub fn random() -> Self {
-        return Vec3::new(random_double(), random_double(), random_double());
-    }
+    // pub fn random() -> Self {
+    //     return Vec3::new(random_double(), random_double(), random_double());
+    // }
 
     pub fn random_range(min: f64, max: f64) -> Self {
         return Vec3::new(
@@ -103,6 +103,13 @@ pub fn random_in_hemisphere(normal: Vec3) -> Vec3 {
 
 pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
     *v - *n * 2.0 * dot(*v, *n)
+}
+
+pub fn refract(uv: &Vec3, n: &Vec3, etai_over_etat: f64) -> Vec3 {
+    let cos_theta = f64::min(dot(-*uv, *n), 1.0);
+    let r_out_perp = Vec3::mul(Vec3::add(*uv, Vec3::mul(*n, cos_theta)), etai_over_etat);
+    let r_out_parallel = Vec3::mul(*n, -f64::sqrt(f64::abs(1.0 - r_out_perp.length_squared())));
+    r_out_parallel + r_out_perp
 }
 
 impl Neg for Vec3 {
