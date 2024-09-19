@@ -1,7 +1,9 @@
 use crate::{
     hittable::HitRecord,
     ray::Ray,
-    vec3::{dot, random_in_unit_sphere, random_unit_vector, reflect, refract, unit_vector, Color},
+    vec3::{
+        dot, random_in_unit_sphere, random_unit_vector, reflect, refract, unit_vector, Color, Vec3,
+    },
 };
 
 pub trait Material {
@@ -94,9 +96,19 @@ impl Material for Dielectric {
         } else {
             self.refraction_index
         };
+
         let unit_direction = unit_vector(r_in.direction());
-        let refracted = refract(&unit_direction, &rec.normal, ri);
-        *scattered = Ray::new(rec.p, refracted);
+        let cos_theta = f64::min(dot(-unit_direction, rec.normal), 1.0);
+        let sin_theta = f64::sqrt(1.0 - cos_theta * cos_theta);
+        let direction: Vec3;
+        if ri * sin_theta > 1.0 {
+            // Must reflect
+            direction = reflect(&unit_direction, &rec.normal)
+        } else {
+            // Must refract
+            direction = refract(&unit_direction, &rec.normal, ri);
+        }
+        *scattered = Ray::new(rec.p, direction);
         true
     }
 }
