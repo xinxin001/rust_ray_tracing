@@ -1,6 +1,7 @@
 use crate::{
     hittable::HitRecord,
     ray::Ray,
+    rtweekend::random_double,
     vec3::{
         dot, random_in_unit_sphere, random_unit_vector, reflect, refract, unit_vector, Color, Vec3,
     },
@@ -80,6 +81,13 @@ impl Dielectric {
             refraction_index: ri,
         }
     }
+
+    pub fn reflectance(&self, cosine: f64, refraction_index: f64) -> f64 {
+        // Schlick's approximation for reflectance
+        // https://en.wikipedia.org/wiki/Schlick's_approximation
+        let r0 = f64::sqrt((1.0 - refraction_index) / (1.0 + refraction_index));
+        return r0 + (1.0 - r0) * f64::powf(1. + cosine, 5.);
+    }
 }
 
 impl Material for Dielectric {
@@ -100,8 +108,9 @@ impl Material for Dielectric {
         let unit_direction = unit_vector(r_in.direction());
         let cos_theta = f64::min(dot(-unit_direction, rec.normal), 1.0);
         let sin_theta = f64::sqrt(1.0 - cos_theta * cos_theta);
+        let cannot_refract = ri * sin_theta > 1.0;
         let direction: Vec3;
-        if ri * sin_theta > 1.0 {
+        if cannot_refract || self.reflectance(cos_theta, ri) > random_double() {
             // Must reflect
             direction = reflect(&unit_direction, &rec.normal)
         } else {
