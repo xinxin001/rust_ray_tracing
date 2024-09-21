@@ -85,8 +85,8 @@ impl Dielectric {
     pub fn reflectance(&self, cosine: f64, refraction_index: f64) -> f64 {
         // Schlick's approximation for reflectance
         // https://en.wikipedia.org/wiki/Schlick's_approximation
-        let r0 = f64::sqrt((1.0 - refraction_index) / (1.0 + refraction_index));
-        return r0 + (1.0 - r0) * f64::powf(1. + cosine, 5.);
+        let r0: f64 = f64::sqrt((1.0 - refraction_index) / (1.0 + refraction_index));
+        return r0 + (1.0 - r0) * f64::powf(1. - cosine, 5.);
     }
 }
 
