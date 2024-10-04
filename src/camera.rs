@@ -9,44 +9,53 @@ use crate::{
 };
 
 pub struct Camera {
-    origin: Point3,
-    lower_left_corner: Point3,
-    horizontal: Vec3,
-    vertical: Vec3,
-    aspect_ratio: f64,
+    center: Point3,      // Camera center
+    pixel00_loc: Point3, // Location of pixel 0,0
+    pixel_delta_u: Vec3, // Offset to pixel to the right
+    pixel_delta_v: Vec3, // Offset to pixel to below
+    pub aspect_ratio: f64,
     pub image_width: usize,
     pub image_height: usize,
     samples_per_pixel: u32,
     max_depth: u32,
 }
 
+fn sample_square() -> Vec3 {
+    Vec3::new(random_double() - 0.5, random_double() - 0.5, 0.)
+}
+
 impl Camera {
-    pub fn new() -> Self {
+    pub fn new(aspect_ratio: f64, image_width: usize, samples_per_pixel: u32) -> Self {
         // Image
-        let aspect_ratio = 1.;
-        let image_width: usize = 400;
-        let mut image_height: usize = (image_width as f64 / aspect_ratio) as usize;
-        image_height = if image_height < 1 { 1 } else { image_height };
-        let samples_per_pixel = 10;
         let max_depth = 10;
 
-        let aspect_ratio = 16.0 / 9.0;
+        let mut image_height: usize = (image_width as f64 / aspect_ratio) as usize;
+        image_height = if image_height < 1 { 1 } else { image_height };
+
+        // Determine viewport dimensions
         let focal_length = 1.0;
-
         let viewport_height = 2.0;
-        let viewport_width = aspect_ratio * viewport_height;
+        let viewport_width = (image_width / image_height) as f64 * viewport_height;
 
-        let origin = Point3::new(0.0, 0.0, 0.0);
-        let horizontal = Vec3::new(viewport_width, 0.0, 0.0);
-        let vertical = Vec3::new(0.0, viewport_height, 0.0);
-        let lower_left_corner =
-            origin - horizontal / 2.0 - vertical / 2.0 - Vec3::new(0.0, 0.0, focal_length);
+        // Calculate the vectors across the horizontal and down the vertical viewport edges
+        let viewport_u = Vec3::new(viewport_width, 0., 0.);
+        let viewport_v = Vec3::new(0., viewport_height, 0.);
 
+        let center = Point3::new(0.0, 0.0, 0.0);
+
+        // Calculate the horizontal and vertical delta vectors from pixel to pixel
+        let pixel_delta_u = viewport_u / image_width as f64;
+        let pixel_delta_v = viewport_v / image_height as f64;
+
+        // Calculate the location of the upper left pixel
+        let viewport_upper_left =
+            center - Vec3::new(0., 0., focal_length) - viewport_u / 2. - viewport_v / 2.;
+        let pixel00_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5;
         Self {
-            origin,
-            lower_left_corner,
-            horizontal,
-            vertical,
+            center,
+            pixel00_loc,
+            pixel_delta_u,
+            pixel_delta_v,
             aspect_ratio,
             image_width,
             image_height,
@@ -55,11 +64,16 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, u: f64, v: f64) -> Ray {
-        return Ray::new(
-            self.origin,
-            self.lower_left_corner + self.horizontal * u + self.vertical * v - self.origin,
-        );
+    pub fn get_ray(&self, i: f64, j: f64) -> Ray {
+        // Construct a camera ray originating from the origin and directed at a randomly sampled
+        // point around the pixel location i, j
+        let offset: Vec3 = sample_square();
+        let pixel_sample = self.pixel00_loc
+            + (self.pixel_delta_u * (i + offset.x()))
+            + (self.pixel_delta_v * (j + offset.y()));
+        let ray_origin = self.center;
+        let ray_direction = pixel_sample - ray_origin;
+        return Ray::new(self.center, ray_direction);
     }
 
     fn ray_color(&self, r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
@@ -91,9 +105,7 @@ impl Camera {
             for i in 0..self.image_width {
                 let mut pixel_color = Color::new(0.0, 0.0, 0.0);
                 for _ in 0..self.samples_per_pixel {
-                    let u = (i as f64 + random_double()) / (self.image_width - 1) as f64;
-                    let v = (j as f64 + random_double()) / (self.image_height - 1) as f64;
-                    let r = self.get_ray(u, v);
+                    let r = self.get_ray(i as f64, j as f64);
                     pixel_color += self.ray_color(&r, world, self.max_depth);
                 }
                 let _ = write_color(&mut std::io::stdout(), pixel_color, self.samples_per_pixel);

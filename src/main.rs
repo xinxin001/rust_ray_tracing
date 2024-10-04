@@ -69,7 +69,7 @@ fn main() -> std::io::Result<()> {
     )));
 
     // Camera
-    let camera = Camera::new();
+    let camera = Camera::new(16. / 9., 400, 1);
 
     println!("P3\n{} {}\n255", camera.image_width, camera.image_height);
     camera.render(&world);
