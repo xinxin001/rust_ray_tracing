@@ -34,9 +34,9 @@ impl Vec3 {
     pub fn y(&self) -> f64 {
         self[1]
     }
-    // pub fn z(&self) -> f64 {
-    //     self[2]
-    // }
+    pub fn z(&self) -> f64 {
+        self[2]
+    }
     pub fn length(&self) -> f64 {
         self.length_squared().sqrt()
     }

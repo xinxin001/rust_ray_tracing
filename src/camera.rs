@@ -17,6 +17,7 @@ pub struct Camera {
     pub image_width: usize,
     pub image_height: usize,
     samples_per_pixel: u32,
+    pixel_samples_scale: f64,
     max_depth: u32,
 }
 
@@ -31,6 +32,8 @@ impl Camera {
 
         let mut image_height: usize = (image_width as f64 / aspect_ratio) as usize;
         image_height = if image_height < 1 { 1 } else { image_height };
+
+        let pixel_samples_scale = 1.0 / samples_per_pixel as f64;
 
         // Determine viewport dimensions
         let focal_length = 1.0;
@@ -60,6 +63,7 @@ impl Camera {
             image_width,
             image_height,
             samples_per_pixel,
+            pixel_samples_scale,
             max_depth,
         }
     }
@@ -108,7 +112,10 @@ impl Camera {
                     let r = self.get_ray(i as f64, j as f64);
                     pixel_color += self.ray_color(&r, world, self.max_depth);
                 }
-                let _ = write_color(&mut std::io::stdout(), pixel_color, self.samples_per_pixel);
+                let _ = write_color(
+                    &mut std::io::stdout(),
+                    pixel_color * self.pixel_samples_scale,
+                );
             }
         }
     }

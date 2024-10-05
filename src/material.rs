@@ -51,8 +51,8 @@ pub struct Metal {
 }
 
 impl Metal {
-    pub fn new(a: Color, f: f64) -> Self {
-        Metal { albedo: a, fuzz: f }
+    pub fn new(albedo: Color, fuzz: f64) -> Self {
+        Metal { albedo, fuzz }
     }
 }
 
