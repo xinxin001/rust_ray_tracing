@@ -3,8 +3,7 @@ use crate::{
     hittable::{HitRecord, Hittable},
     hittable_list::HittableList,
     ray::Ray,
-    rtweekend::random_double,
-    rtweekend::INFINITY,
+    rtweekend::{degrees_to_radians, random_double, INFINITY},
     vec3::{unit_vector, Color, Point3, Vec3},
 };
 
@@ -14,8 +13,8 @@ pub struct Camera {
     pixel_delta_u: Vec3, // Offset to pixel to the right
     pixel_delta_v: Vec3, // Offset to pixel to below
     pub aspect_ratio: f64,
-    pub image_width: usize,
-    pub image_height: usize,
+    pub image_width: u32,
+    pub image_height: u32,
     samples_per_pixel: u32,
     pixel_samples_scale: f64,
     max_depth: u32,
@@ -26,25 +25,30 @@ fn sample_square() -> Vec3 {
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f64, image_width: usize, samples_per_pixel: u32) -> Self {
-        // Image
-        let max_depth = 10;
-
-        let mut image_height: usize = (image_width as f64 / aspect_ratio) as usize;
+    pub fn new(
+        max_depth: u32,
+        aspect_ratio: f64,
+        image_width: u32,
+        samples_per_pixel: u32,
+        vfov: f64,
+    ) -> Self {
+        let mut image_height = (image_width as f64 / aspect_ratio) as u32;
         image_height = if image_height < 1 { 1 } else { image_height };
 
         let pixel_samples_scale = 1.0 / samples_per_pixel as f64;
 
         // Determine viewport dimensions
         let focal_length = 1.0;
-        let viewport_height = 2.0;
+        let theta = degrees_to_radians(vfov);
+        let h = f64::tan(theta / 2.);
+        let viewport_height = 2. * h * focal_length;
         let viewport_width = (image_width / image_height) as f64 * viewport_height;
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges
         let viewport_u = Vec3::new(viewport_width, 0., 0.);
-        let viewport_v = Vec3::new(0., viewport_height, 0.);
+        let viewport_v = Vec3::new(0., -viewport_height, 0.);
 
-        let center = Point3::new(0.0, 0.0, 0.0);
+        let center = Point3::new(0., 0., 0.);
 
         // Calculate the horizontal and vertical delta vectors from pixel to pixel
         let pixel_delta_u = viewport_u / image_width as f64;
