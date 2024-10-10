@@ -77,6 +77,8 @@ fn main() -> std::io::Result<()> {
         Point3::new(-2., 2., 1.),
         Point3::new(0., 0., -1.),
         Vec3::new(0., 1., 0.),
+        3.4,
+        10.,
     );
 
     println!("P3\n{} {}\n255", camera.image_width, camera.image_height);
