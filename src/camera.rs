@@ -4,7 +4,7 @@ use crate::{
     hittable_list::HittableList,
     ray::Ray,
     rtweekend::{degrees_to_radians, random_double, INFINITY},
-    vec3::{unit_vector, Color, Point3, Vec3},
+    vec3::{cross, unit_vector, Color, Point3, Vec3},
 };
 
 pub struct Camera {
@@ -18,6 +18,9 @@ pub struct Camera {
     samples_per_pixel: u32,
     pixel_samples_scale: f64,
     max_depth: u32,
+    pub lookfrom: Point3,
+    pub lookat: Point3,
+    pub vup: Vec3,
 }
 
 fn sample_square() -> Vec3 {
@@ -31,6 +34,9 @@ impl Camera {
         image_width: u32,
         samples_per_pixel: u32,
         vfov: f64,
+        lookfrom: Point3,
+        lookat: Point3,
+        vup: Vec3,
     ) -> Self {
         let mut image_height = (image_width as f64 / aspect_ratio) as u32;
         image_height = if image_height < 1 { 1 } else { image_height };
@@ -38,25 +44,29 @@ impl Camera {
         let pixel_samples_scale = 1.0 / samples_per_pixel as f64;
 
         // Determine viewport dimensions
-        let focal_length = 1.0;
+        let focal_length = (lookfrom - lookat).length();
         let theta = degrees_to_radians(vfov);
         let h = f64::tan(theta / 2.);
         let viewport_height = 2. * h * focal_length;
-        let viewport_width = (image_width / image_height) as f64 * viewport_height;
+        let viewport_width = (image_width as f64 / image_height as f64) * viewport_height;
+
+        // Calculate the u, v, w unit basis vectors for the camera coordinate frame
+        let w = lookfrom - lookat;
+        let u = unit_vector(cross(vup, w));
+        let v = cross(w, u);
 
         // Calculate the vectors across the horizontal and down the vertical viewport edges
-        let viewport_u = Vec3::new(viewport_width, 0., 0.);
-        let viewport_v = Vec3::new(0., -viewport_height, 0.);
+        let viewport_u = u * viewport_width;
+        let viewport_v = -v * viewport_height;
 
-        let center = Point3::new(0., 0., 0.);
+        let center = lookfrom;
 
         // Calculate the horizontal and vertical delta vectors from pixel to pixel
         let pixel_delta_u = viewport_u / image_width as f64;
         let pixel_delta_v = viewport_v / image_height as f64;
 
         // Calculate the location of the upper left pixel
-        let viewport_upper_left =
-            center - Vec3::new(0., 0., focal_length) - viewport_u / 2. - viewport_v / 2.;
+        let viewport_upper_left = center - (w * focal_length) - viewport_u / 2. - viewport_v / 2.;
         let pixel00_loc = viewport_upper_left + (pixel_delta_u + pixel_delta_v) * 0.5;
         Self {
             center,
@@ -69,6 +79,9 @@ impl Camera {
             samples_per_pixel,
             pixel_samples_scale,
             max_depth,
+            lookfrom,
+            lookat,
+            vup,
         }
     }
 
@@ -81,7 +94,7 @@ impl Camera {
             + (self.pixel_delta_v * (j + offset.y()));
         let ray_origin = self.center;
         let ray_direction = pixel_sample - ray_origin;
-        return Ray::new(self.center, ray_direction);
+        return Ray::new(ray_origin, ray_direction);
     }
 
     fn ray_color(&self, r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
@@ -108,8 +121,8 @@ impl Camera {
     }
 
     pub fn render(&self, world: &HittableList) {
-        for j in (0..self.image_height).rev() {
-            eprintln!("Scanlines remaining: {}", j);
+        for j in 0..self.image_height {
+            eprintln!("Scanlines remaining: {}", self.image_height - j);
             for i in 0..self.image_width {
                 let mut pixel_color = Color::new(0.0, 0.0, 0.0);
                 for _ in 0..self.samples_per_pixel {
