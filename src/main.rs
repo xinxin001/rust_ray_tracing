@@ -47,22 +47,22 @@ fn main() -> std::io::Result<()> {
         material_ground.clone(),
     )));
     world.add(Box::new(Sphere::with_values(
-        Point3::new(0.0, 0.0, -1.2),
+        Point3::new(0.0, 0.0, -2.),
         0.5,
         material_center.clone(),
     )));
     world.add(Box::new(Sphere::with_values(
-        Point3::new(-1.0, 0.0, -1.0),
+        Point3::new(-1.0, 0.0, -1.2),
         0.5,
         material_left.clone(),
     )));
     world.add(Box::new(Sphere::with_values(
-        Point3::new(-1., 0., -1.),
+        Point3::new(-1., 0., -1.2),
         0.4,
         material_bubble.clone(),
     )));
     world.add(Box::new(Sphere::with_values(
-        Point3::new(1.0, 0.0, -1.0),
+        Point3::new(1.0, 0.0, -0.8),
         0.5,
         material_right.clone(),
     )));
@@ -72,12 +72,12 @@ fn main() -> std::io::Result<()> {
         10,
         16. / 9.,
         400,
-        50,
-        120.,
-        Point3::new(-2., 2., 1.),
+        10,
+        90.,
+        Point3::new(0., 0., 0.),
         Point3::new(0., 0., -1.),
         Vec3::new(0., 1., 0.),
-        3.4,
+        2.,
         10.,
     );
 
