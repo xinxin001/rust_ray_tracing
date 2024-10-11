@@ -13,14 +13,6 @@ pub struct Sphere {
 }
 
 impl Sphere {
-    pub fn new() -> Self {
-        Self {
-            center: Point3::new(0.0, 0.0, 0.0),
-            radius: 0.0,
-            mat_ptr: None,
-        }
-    }
-
     pub fn with_values(center: Point3, radius: f64, m: Rc<dyn Material>) -> Self {
         Self {
             center,

@@ -3,7 +3,7 @@ use std::rc::Rc;
 use crate::{
     material::Material,
     ray::Ray,
-    vec3::{dot, Color, Point3, Vec3},
+    vec3::{dot, Point3, Vec3},
 };
 
 #[derive(Clone, Default)]

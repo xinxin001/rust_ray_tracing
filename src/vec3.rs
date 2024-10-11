@@ -1,6 +1,6 @@
 use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub};
 
-use crate::rtweekend::random_double_range;
+use crate::rtweekend::{random_double, random_double_range};
 
 pub type Point3 = Vec3; // 3D point
 pub type Color = Vec3; // RGB color
@@ -48,9 +48,9 @@ impl Vec3 {
         self.e.iter().all(|&val| val.abs() < s)
     }
 
-    // pub fn random() -> Self {
-    //     return Vec3::new(random_double(), random_double(), random_double());
-    // }
+    pub fn random() -> Self {
+        return Vec3::new(random_double(), random_double(), random_double());
+    }
 
     pub fn random_range(min: f64, max: f64) -> Self {
         return Vec3::new(

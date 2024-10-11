@@ -119,10 +119,10 @@ impl Camera {
     }
 
     fn ray_color(&self, r: &Ray, world: &dyn Hittable, depth: u32) -> Color {
-        let mut rec = HitRecord::default();
         if depth <= 0 {
             return Color::new(0.0, 0.0, 0.0);
         }
+        let mut rec = HitRecord::default();
         if world.hit(r, 0.001, INFINITY, &mut rec) {
             let mut scattered = Ray::default();
             let mut attenuation = Color::new(0.0, 0.0, 0.0);

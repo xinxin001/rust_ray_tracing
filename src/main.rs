@@ -13,8 +13,9 @@ use std::rc::Rc;
 use crate::{
     camera::Camera,
     hittable_list::HittableList,
-    material::{Dielectric, Lambertian, Metal},
+    material::{Dielectric, Lambertian, Material, Metal},
     ray::Ray,
+    rtweekend::{random_double, random_double_range},
     sphere::Sphere,
     vec3::{dot, Color, Point3, Vec3},
 };
@@ -35,50 +36,55 @@ fn main() -> std::io::Result<()> {
     // World
     let mut world = HittableList::new();
 
-    let material_ground = Rc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
-    let material_center = Rc::new(Lambertian::new(Color::new(0.1, 0.2, 0.5)));
-    let material_left = Rc::new(Dielectric::new(1.5));
-    let material_bubble = Rc::new(Dielectric::new(1. / 1.5));
-    let material_right = Rc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 0.));
+    // let material_ground = Rc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    // world.add(Box::new(Sphere::with_values(
+    //     Point3::new(-4.0, -1000., 0.0),
+    //     1000.0,
+    //     material_ground.clone(),
+    // )));
 
+    let material_test = Rc::new(Lambertian::new(Color::new(1., 0., 0.)));
     world.add(Box::new(Sphere::with_values(
-        Point3::new(0.0, -100.5, -1.0),
-        100.0,
-        material_ground.clone(),
+        Point3::new(0., 0., -3.),
+        1.,
+        material_test.clone(),
     )));
-    world.add(Box::new(Sphere::with_values(
-        Point3::new(0.0, 0.0, -2.),
-        0.5,
-        material_center.clone(),
-    )));
-    world.add(Box::new(Sphere::with_values(
-        Point3::new(-1.0, 0.0, -1.2),
-        0.5,
-        material_left.clone(),
-    )));
-    world.add(Box::new(Sphere::with_values(
-        Point3::new(-1., 0., -1.2),
-        0.4,
-        material_bubble.clone(),
-    )));
-    world.add(Box::new(Sphere::with_values(
-        Point3::new(1.0, 0.0, -0.8),
-        0.5,
-        material_right.clone(),
-    )));
-
+    // for a in -11..11 {
+    //     for b in -11..11 {
+    //         let choose_mat = random_double();
+    //         let center = Point3::new(
+    //             a as f64 + 0.9 * random_double(),
+    //             0.2,
+    //             b as f64 + 0.9 * random_double(),
+    //         );
+    //         if (center - Point3::new(4., 0.2, 0.)).length() > 0.9 {
+    //             let sphere_material: Rc<dyn Material>;
+    //             if choose_mat < 0.8 {
+    //                 let albedo = Color::random() * Color::random();
+    //                 sphere_material = Rc::new(Lambertian::new(albedo));
+    //             } else if choose_mat < 0.95 {
+    //                 let albedo = Color::random_range(0.5, 1.);
+    //                 let fuzz = random_double_range(0., 0.5);
+    //                 sphere_material = Rc::new(Metal::new(albedo, fuzz));
+    //             } else {
+    //                 sphere_material = Rc::new(Dielectric::new(1.5));
+    //             }
+    //             world.add(Box::new(Sphere::with_values(center, 0.2, sphere_material)));
+    //         }
+    //     }
+    // }
     // Camera
     let camera = Camera::new(
         10,
         16. / 9.,
         400,
-        100,
+        10,
         90.,
         Point3::new(0., 0., 0.),
-        Point3::new(0., 0., -1.),
+        Point3::new(0., 0., -3.),
         Vec3::new(0., 1., 0.),
-        2.,
-        10.,
+        3.,
+        0.6,
     );
 
     println!("P3\n{} {}\n255", camera.image_width, camera.image_height);
