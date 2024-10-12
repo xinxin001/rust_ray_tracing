@@ -1,11 +1,15 @@
 use crate::{
-    color::write_color,
+    color::{clamp_color, write_color},
     hittable::{HitRecord, Hittable},
     hittable_list::HittableList,
     ray::Ray,
     rtweekend::{degrees_to_radians, random_double, INFINITY},
     vec3::{cross, random_in_unit_disk, unit_vector, Color, Point3, Vec3},
 };
+
+use std::io::Write;
+
+use rayon::prelude::*;
 
 pub struct Camera {
     center: Point3,      // Camera center
@@ -142,19 +146,26 @@ impl Camera {
     }
 
     pub fn render(&self, world: &HittableList) {
-        for j in 0..self.image_height {
-            eprintln!("Scanlines remaining: {}", self.image_height - j);
-            for i in 0..self.image_width {
-                let mut pixel_color = Color::new(0.0, 0.0, 0.0);
-                for _ in 0..self.samples_per_pixel {
-                    let r = self.get_ray(i as f64, j as f64);
-                    pixel_color += self.ray_color(&r, world, self.max_depth);
-                }
-                let _ = write_color(
-                    &mut std::io::stdout(),
-                    pixel_color * self.pixel_samples_scale,
-                );
-            }
+        let pixels: Vec<String> = (0..self.image_height)
+            .into_par_iter()
+            .flat_map(|j| {
+                let row: Vec<String> = (0..self.image_width)
+                    .into_par_iter()
+                    .map(|i| {
+                        let mut pixel_color = Color::new(0.0, 0.0, 0.0);
+                        for _ in 0..self.samples_per_pixel {
+                            let r = self.get_ray(i as f64, j as f64);
+                            pixel_color += self.ray_color(&r, world, self.max_depth);
+                        }
+                        let color = clamp_color(pixel_color * self.pixel_samples_scale);
+                        color
+                    })
+                    .collect();
+                row
+            })
+            .collect();
+        for p in pixels {
+            let _ = writeln!(&mut std::io::stdout(), "{}", p);
         }
     }
 }

@@ -211,3 +211,19 @@ impl std::fmt::Display for Vec3 {
         write!(f, "{} {} {}", self.e[0], self.e[1], self.e[2])
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn length() {
+        let v = Vec3::new(2., 1., 1.);
+        assert_eq!(v.length(), f64::sqrt(6.0));
+    }
+    #[test]
+    fn length_squared() {
+        let v = Vec3::new(2., 1., 1.);
+        assert_eq!(v.length_squared(), 6.0);
+    }
+}

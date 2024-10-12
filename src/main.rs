@@ -8,7 +8,7 @@ mod rtweekend;
 mod sphere;
 mod vec3;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::{
     camera::Camera,
@@ -36,54 +36,86 @@ fn main() -> std::io::Result<()> {
     // World
     let mut world = HittableList::new();
 
-    // let material_ground = Rc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    // let material_ground = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
     // world.add(Box::new(Sphere::with_values(
     //     Point3::new(-4.0, -1000., 0.0),
     //     1000.0,
     //     material_ground.clone(),
     // )));
 
-    let material_test = Rc::new(Lambertian::new(Color::new(1., 0., 0.)));
+    let material_test = Arc::new(Lambertian::new(Color::new(1., 0., 0.)));
     world.add(Box::new(Sphere::with_values(
         Point3::new(0., 0., -3.),
         1.,
         material_test.clone(),
     )));
-    // for a in -11..11 {
-    //     for b in -11..11 {
-    //         let choose_mat = random_double();
-    //         let center = Point3::new(
-    //             a as f64 + 0.9 * random_double(),
-    //             0.2,
-    //             b as f64 + 0.9 * random_double(),
-    //         );
-    //         if (center - Point3::new(4., 0.2, 0.)).length() > 0.9 {
-    //             let sphere_material: Rc<dyn Material>;
-    //             if choose_mat < 0.8 {
-    //                 let albedo = Color::random() * Color::random();
-    //                 sphere_material = Rc::new(Lambertian::new(albedo));
-    //             } else if choose_mat < 0.95 {
-    //                 let albedo = Color::random_range(0.5, 1.);
-    //                 let fuzz = random_double_range(0., 0.5);
-    //                 sphere_material = Rc::new(Metal::new(albedo, fuzz));
-    //             } else {
-    //                 sphere_material = Rc::new(Dielectric::new(1.5));
-    //             }
-    //             world.add(Box::new(Sphere::with_values(center, 0.2, sphere_material)));
-    //         }
-    //     }
-    // }
+    for a in -11..11 {
+        for b in -11..11 {
+            let choose_mat = random_double();
+            let center = Point3::new(
+                a as f64 + 0.9 * random_double(),
+                0.2,
+                b as f64 + 0.9 * random_double(),
+            );
+            if (center - Point3::new(4., 0.2, 0.)).length() > 0.9 {
+                let sphere_material: Arc<dyn Material>;
+                if choose_mat < 0.8 {
+                    let albedo = Color::random() * Color::random();
+                    sphere_material = Arc::new(Lambertian::new(albedo));
+                } else if choose_mat < 0.95 {
+                    let albedo = Color::random_range(0.5, 1.);
+                    let fuzz = random_double_range(0., 0.5);
+                    sphere_material = Arc::new(Metal::new(albedo, fuzz));
+                } else {
+                    sphere_material = Arc::new(Dielectric::new(1.5));
+                }
+                world.add(Box::new(Sphere::with_values(center, 0.2, sphere_material)));
+            }
+        }
+    }
     // Camera
+
+    let material_ground = Arc::new(Lambertian::new(Color::new(0.8, 0.8, 0.0)));
+    let material_center = Arc::new(Lambertian::new(Color::new(0.7, 0.3, 0.3)));
+    let material_left = Arc::new(Dielectric::new(1.5));
+    let material_bubble = Arc::new(Dielectric::new(1.00 / 1.5));
+    let material_right = Arc::new(Metal::new(Color::new(0.8, 0.6, 0.2), 1.0));
+
+    world.add(Box::new(Sphere::with_values(
+        Point3::new(0.0, -100.5, -1.0),
+        100.0,
+        material_ground.clone(),
+    )));
+    world.add(Box::new(Sphere::with_values(
+        Point3::new(0.0, 0.0, -1.0),
+        0.5,
+        material_center.clone(),
+    )));
+    world.add(Box::new(Sphere::with_values(
+        Point3::new(-1.0, 0.0, -1.0),
+        0.5,
+        material_left.clone(),
+    )));
+    world.add(Box::new(Sphere::with_values(
+        Point3::new(-1.0, 0.0, -1.0),
+        0.4,
+        material_bubble.clone(),
+    )));
+    world.add(Box::new(Sphere::with_values(
+        Point3::new(1.0, 0.0, -1.0),
+        0.5,
+        material_right.clone(),
+    )));
     let camera = Camera::new(
-        10,
+        50,
         16. / 9.,
         400,
-        10,
+        50,
         90.,
         Point3::new(0., 0., 0.),
-        Point3::new(0., 0., -3.),
+        Point3::new(0., 0., -1.),
         Vec3::new(0., 1., 0.),
-        3.,
+        1.,
         0.6,
     );
 

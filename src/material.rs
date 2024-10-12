@@ -7,7 +7,7 @@ use crate::{
     },
 };
 
-pub trait Material {
+pub trait Material: Send + Sync {
     fn scatter(
         &self,
         r_in: &Ray,
@@ -35,11 +35,11 @@ impl Material for Lambertian {
         attenuation: &mut Color,
         scattered: &mut Ray,
     ) -> bool {
-        let mut scatter_direciton = rec.normal + random_unit_vector();
-        if scatter_direciton.near_zero() {
-            scatter_direciton = rec.normal;
+        let mut scatter_direction = rec.normal + random_unit_vector();
+        if scatter_direction.near_zero() {
+            scatter_direction = rec.normal;
         }
-        *scattered = Ray::new(rec.p, scatter_direciton);
+        *scattered = Ray::new(rec.p, scatter_direction);
         *attenuation = self.albedo;
         true
     }
